@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# run commands are at the bottom of the file
+
+HOST=localhost
+PORT=5432
+USER=postgres
+PASSWORD=postgres
+CLIENTS=(1 2 8 32 64 128 512)
+RELATIONS=(1 2 8 32 128 512 2048)
+U=90 # number of user issued queries (see original benchmark documentation)
+N=(10) # number of queries in each transaction
+TIME=60
+OTHER_OPTIONS="--Xordered --XinitialCustomers 100000 --XinitialStockMultiplier 100000 --mrv-opt"
+#OTHER_OPTIONS=""
+MRV_WORKERS=true # true | false
+
+run () {
+    if [[ "$1" == "mrv" ]]; then
+        MRV="--mrv"
+
+        cd ../generic/mrvgenericworker
+        mvn clean install -q
+        cd ../../stamp_vacation
+
+        sed -i "s|//.*:|//${HOST}:|" workers_config.yml
+        sed -i -r "s|:[0-9]+/|:${PORT}/|" workers_config.yml
+        sed -i "s|user=.*&|user=${USER}\&|" workers_config.yml
+        sed -i "s|password=.*|password=${PASSWORD}|" workers_config.yml
+        cp workers_config.yml ../generic/mrvgenericworker/src/main/resources/config.yml
+
+        sed -i "s|host:.*|host: ${HOST}|" model_stamp_vacation.yml
+        sed -i "s|port:.*|port: ${PORT}|" model_stamp_vacation.yml
+        sed -i "s|user:.*|user: ${USER}|" model_stamp_vacation.yml
+        sed -i "s|password:.*|password: ${PASSWORD}|" model_stamp_vacation.yml
+    else
+        MRV=""
+    fi
+
+    cd vacationdb
+    for c in ${CLIENTS[@]}; do
+        for r in ${RELATIONS[@]}; do
+            for n in ${N[@]}; do
+                echo "type:$1 c:$c r:$r n:$n"
+
+                PGPASSWORD=$PASSWORD dropdb -h $HOST -p $PORT -U $USER testdb; PGPASSWORD=$PASSWORD createdb -h $HOST -p $PORT -U $USER testdb
+                PGPASSWORD=$PASSWORD psql -h $HOST -p $PORT -U $USER -d testdb -c "create table tx_status (table_name varchar, column_name varchar, pk varchar, commits int, aborts int, last_updated timestamp, pk_sql varchar, primary key(table_name, column_name, pk))"
+                java -jar target/vacation-1.0-SNAPSHOT.jar \
+                    -d jdbc:postgresql://${HOST}:${PORT}/testdb -U $USER -P $PASSWORD \
+                    --no-run --no-drop -r $r $OTHER_OPTIONS
+
+                if [[ "$1" == "mrv" ]]; then
+                    cd ../../generic
+                    initialRecords=$(( c == 1 ? 1 : (c * 4 < r ? 1 : c * 4 / r ) ))
+                    python3 convert_model.py ../stamp_vacation/model_stamp_vacation.yml $initialRecords
+                    if [[ "$MRV_WORKERS" = "true" ]]; then
+                        cd mrvgenericworker
+                        mvn exec:java -Dexec.mainClass="Main" &
+                        workers=$!
+                        sleep 5
+                        cd ..
+                    fi
+                    cd ../stamp_vacation/vacationdb
+                fi
+
+                java -jar target/vacation-1.0-SNAPSHOT.jar \
+                    -d jdbc:postgresql://${HOST}:${PORT}/testdb -U $USER -P $PASSWORD \
+                    --no-create --no-populate --no-drop $OTHER_OPTIONS \
+                    -r $r -u $U -n $N -t $TIME -c $c $MRV > ../results/${1}_${c}c_${r}r_${n}n.txt
+
+                if [[ "$1" == "mrv" ]] && [[ "$MRV_WORKERS" = "true" ]]; then
+                    kill $workers
+                fi
+                sleep 30
+            done
+        done
+    done
+    cd ..
+}
+
+
+mkdir -p results
+cd vacationdb; mvn package -q; cd ..
+
+run "normal"
+run "mrv"

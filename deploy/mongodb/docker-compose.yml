@@ -1,0 +1,42 @@
+# https://gist.github.com/asoorm/7822cc742831639c93affd734e97ce4f
+version: '3.5'
+services:
+  mongo1:
+    hostname: mongo1
+    container_name: mongo1
+    image: mongo:4.2.8
+    ports:
+      - 27011:27011
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--port", "27011", "--bind_ip_all", "--replSet", "replica_set" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 8G
+  mongo2:
+    hostname: mongo2
+    container_name: mongo2
+    image: mongo:4.2.8
+    ports:
+      - 27012:27012
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--port", "27012", "--bind_ip_all", "--replSet", "replica_set" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 8G
+  mongo3:
+    hostname: mongo3
+    container_name: mongo3
+    image: mongo:4.2.8
+    ports:
+      - 27013:27013
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--port", "27013", "--bind_ip_all", "--replSet", "replica_set" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 8G

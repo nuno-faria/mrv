@@ -1,0 +1,29 @@
+connectionString: jdbc:postgresql://localhost:5432/testdb?user=postgres&password=postgres
+statusTable: tx_status
+adjustWorkers: 2 # 0 to disable
+adjustDelta: 1000 #ms
+adjustWindow: 25 # percentage of adjustDelta
+minAverageAmountPerNode: 1
+maxNodes: 256
+minNodes: 1
+arGoal: 0.05
+arMin: 0.01
+balanceWorkers: 2 # 0 to disable
+balanceDelta: 100 #ms
+balanceWindow: 200 # percentage of balanceDelta
+balanceMinDiff: 10 # percentage between min and max
+balanceMinmaxK: 1
+balanceMinmaxKRatio: 16
+balanceAlgorithm: minmax # random | minmax
+monitor: true
+monitorDelta: 5000 #ms
+monitorTables:
+  - car_reservation_numfree
+  - car_reservation_numtotal
+  #- car_reservation_price
+  - flight_reservation_numfree
+  - flight_reservation_numtotal
+  #- flight_reservation_price
+  - room_reservation_numfree
+  - room_reservation_numtotal
+  #- room_reservation_price

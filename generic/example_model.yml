@@ -1,0 +1,31 @@
+# name of the database
+database: testdb
+# host
+host: localhost
+# port
+port: 5432
+# user
+user: postgres
+# password
+password: postgres
+# schema
+schema: public
+# number of intial nodes per MRV
+# can be overwritten by providing an argument to the convert_model.py script
+initialNodes: 8
+# number of maximum nodes allowed per MRV
+maxNodes: 1024
+# average minimum amount per node allowed
+# initial nodes = min(initial nodes, values / minAmountPerNode); 0 to ignore
+minAmountPerNode: 1
+# distributes quantity over multiple smaller records if add amount > 'distributeAddsAfter' (0 to disable)
+distributeAddsAfter: 0 
+# if distributeAddsAfter > 0, distributes adds over 'distributeAddsSize' number of records
+# ensure distributeAddsAfter / distributeAddsSize >= 1
+distributeAddsSize: 5
+# fields to convert to MRV
+tables:
+  - name: warehouse1
+    mrv: [ w_ytd ]
+  - name: district1
+    mrv: [ d_ytd ]

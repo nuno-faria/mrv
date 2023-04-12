@@ -1,0 +1,46 @@
+# PostgreSQL only
+connectionString: jdbc:postgresql://localhost:5432/testdb?user=postgres&password=postgres
+# table that stores the transactions' results
+# schema (table_name varchar, column_name varchar, pk varchar, commit int, aborts int, last_updated timestamp)
+# primary key (table_name, column_name, pk)
+statusTable: tx_status
+# number of workers to adjust the number of nodes (0 to disable)
+adjustWorkers: 2
+# time between adjusts (ms)
+adjustDelta: 1000
+# only adjust if the MRV was modified between now() - adjustDelta * adjustWindow / 100 and now()
+adjustWindow: 25 # adjust only if the record was updated percentage of adjustDelta
+# starts decreasing the number of nodes if MRV value / current nodes < minAverageAmountPerNode
+minAverageAmountPerNode: 1
+# maximum number of nodes per MRV allowed
+maxNodes: 1024
+# minimum number of nodes per MRV allowed
+minNodes: 1
+# abort rate goal the adjust worker should aim to
+arGoal: 0.05
+# abort rate below which the adjust worker starts removing nodes
+arMin: 0.01
+# number of workers to balance the amount between nodes (0 to disable)
+balanceWorkers: 2 # 0 to disable
+# time between balances (ms)
+balanceDelta: 200
+# only balance if the MRV was modified between now() - balanceDelta * balanceWindow / 100 and now()
+balanceWindow: 100
+# algorithm used by the balance worker
+# random - balances two nodes at random
+# minmax - balances the k-minimum and k-maxmimum values (recommended)
+balanceAlgorithm: minmax # random | minmax
+# if balanceAlgorithm = minmax, k is set to balanceMinmaxK
+balanceMinmaxK: 1
+# if balanceMinmaxKRatio > 0, k is set to max(1, #nodes / balanceMinmaxKRatio)
+balanceMinmaxKRatio: 16
+# only balances if the difference in percentage between minimum and maximum selected records < balanceMinDiff
+balanceMinDiff: 10 # percentage between min and max
+# measures the number of nodes per mrv
+monitor: false
+# time between monitor measuring
+monitorDelta: 2000 #ms
+# tables to monitor
+monitorTables:
+  - warehouse1_w_ytd
+  - district1_d_ytd

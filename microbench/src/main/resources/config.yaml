@@ -1,0 +1,124 @@
+# CONNECTION
+
+# database engine ([postgresql, mysql, mongodb])
+dbms: postgresql
+# database server ip:port (multiple if using a cluster)
+servers:
+  - 127.0.0.1:5432
+# database name
+database: testdb
+# username
+user: postgres
+# password
+pass: postgres
+
+
+# BENCHMARK
+
+# time for each test (seconds, first 5 are removed from the final results, therefore must be > 5)
+time: 65
+# mode of the benchmark: write, read, or hybrid (reads and writes, controlled by the hybridReadRatios parameter)
+mode: write
+# if mode == hybrid, controls the ratio of read operations (between 0 (no reads) and 1 (all reads))
+hybridReadRatios: [0]
+# controls what the hybrid read ratio applies to
+# transactions - hybridReadRatio of all transactions are reads
+# clients - hybridReadRatio of all clients execute only reads
+hybridReadRatioUnit: transactions
+# uniform: same amount of adds and subs; uneven: one big add (+unevenScale) per unevenScale-1 small subs (-1)
+# adds: only adds; subs: only subs
+# (only applicable to the 'write' mode)
+opDistribution: uniform
+# when opDistribution=uneven, performs one 'unevenScale' sized add per every unevenScale single-unit subs
+unevenScales: [100]
+# uniform: same probability for every product; powerlaw: follows the power law distribution
+accessDistribution: uniform
+# time bucket to compute throughput std dev (seconds)
+timeBucketErr: 10
+# cooldown between tests (seconds)
+cooldown: 30
+# maximum number of products modified or read
+productsAccessed: [1]
+# list with number of clients
+clients: [64]
+# list with the number of products
+sizes: [32]
+# list with initials stocks (in mrv, it is evenly distributed across all nodes, except when zeroNodesPercentage > 0)
+initialStocks: [8192]
+# list with amount limit to increment/decrement (amount in [1,amountLimit]; not used when opDistribution=uneven)
+amountLimits: [3]
+# isolations used [2 - Read Committed, 4 - Repeatable Read, 8 - Serializable]
+isolations: [4]
+# whether or not there are conflicts between clients ([true, false])
+# i.e. true - one client per product, false - any client can update any product
+# if true, pIdLimits == clients
+noCollisions: [false]
+# types of benchmark to execute
+# normal - single row per product (baseline)
+# mrv - multiple rows per product
+# phaseReconciliation - single record per value (joined phase) one record per core (split phase) (https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-narula.pdf)
+types: [normal, mrv]
+
+
+# MRV specific options (node = record)
+
+# max number of nodes per product
+maxNodes: 1024
+# min number of nodes per product
+minNodes: 1
+# number of initials nodes
+# when = 0, initial nodes will be the same as the number of clients (or maxNodes, if nClients > maxNodes)
+# when = -1, initial nodes will be double the number of clients (or maxNodes, if 2 * nClients > maxNodes)
+# when = -n (with n != 1), initial nodes will be max(ceil((clients / size) * n), 1)
+initialNodes: [0]
+# percentage of nodes with initial stock = 0
+zeroNodesPercentages: [0]
+# whether to activate the workers (they use the first server address provided) ([all, adjust, balance, none])
+# (automatically turned off when running the benchmark in read mode)
+workers: all
+# random: two records at random;
+# minmax: minimum and maximum records in terms of value
+# all: all nodes in one go
+balanceAlgorithms: [minmax]
+# (worker) time between balancing stock between nodes
+balanceDeltas: [100]
+# when balanceAlgorithm=minmax, balances de K-maximum and K-minimum records (K >= 1)
+balanceMinmaxKs: [1]
+# if balanceMinmaxKRatio > 0, balanceMinmaxK will be equal to max(min(#records / balanceMinmaxKRatio, 32), 1)
+balanceMinmaxKRatios: [16]
+# when balanceAlgorithm=minmax|random, only balance if the difference in percentage between max and min >= balanceMinDiff
+balanceMinDiffs: [10]
+# only balance a product if it was last updated between now and (now - balanceNodesDelta * balanceWindow / 100) ms
+# (i.e. percentage of the balanceWindow)
+balanceWindows: [100]
+# algorithm used for adjusting (binary, linear (recommended) or quadratic)
+adjustAlgorithms: [linear]
+# (worker) time between adjusting number of nodes
+adjustDeltas: [1000]
+# only adjust a product if it was last updated between now and (now - adjustNodesDelta * adjustNodesWindow / 100) ms
+# (i.e. percentage of the adjustNodesWindow)
+adjustWindows: [25]
+# time between monitoring
+monitorDelta: 500
+# ar goal the adjust worker should aim to
+arGoal: 0.05
+# minimum ar before starting to remove nodes
+arMin: 0.01
+# minimum average amount per node
+# (ex: minAverageAmountPerNode = 2 => if total stock is 100 than the maximum number of nodes is 50)
+minAverageAmountPerNode: 4
+# when set to bigger than zero, balances the add operation among multiple records (with the least amount)
+# (used only with the 'uneven' write benchmark)
+distributeAddsSize: 0
+
+
+# Phase Reconciliation specific options
+
+# rate at which the coordinator considers a new phase change
+phaseDeltaMillis: 20
+# abort rates above which we split a value
+abortRatesToSplit: [0.65]
+# ratios of transactions waiting for the joined phase, relatively to the number of cores, above which we join a value
+waitingRatiosToJoin: [0.25]
+# ratios of aborted transactions due to no stock above which we consider joining a product
+noStockRatiosToJoin: [0]

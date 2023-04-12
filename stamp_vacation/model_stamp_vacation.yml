@@ -1,0 +1,18 @@
+database: testdb
+host: localhost
+port: 5432
+user: postgres
+password: postgres
+initialNodes: 8 # can be overwritten by providing an argument to the convert_model script
+minAmountPerNode: 1 # initial nodes = min(initial nodes, values / minAmountPerNode); 0 to ignore
+maxNodes: 256
+distributeAddsAfter: 0 # distributes quantity over multiple smaller records if add amount >= 'distributeAddsAfter' (0 to disable)
+distributeAddsSize: 2 # if distributeAddsAfter > 0, distributes adds over 'distributeAddsSize' number of records
+schema: public
+tables:
+  - name: car_reservation
+    mrv: [ numfree, numtotal] #, price ]
+  - name: flight_reservation
+    mrv: [ numfree, numtotal] #, price ]
+  - name: room_reservation
+    mrv: [ numfree, numtotal] #, price ]
