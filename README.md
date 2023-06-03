@@ -1,7 +1,7 @@
 # Multi-Record Values
 
 This repo provides several benchmarks and techniques to test and implement Multi-Record Values (MRVs), including at application-level (microbenchmark), at middleware-level (TPC-C and STAMP Vacation), and at engine-level (DBx1000).
-The complete design can be found in the corresponding paper, [*MRVs: Enforcing Numeric Invariants in Parallel Updates to Hotspots with Randomized Splitting*](https://doi.org/10.1145/3588723), accepted for SIGMOD 2023.
+The complete design can be found in the corresponding paper, [*MRVs: Enforcing Numeric Invariants in Parallel Updates to Hotspots with Randomized Splitting*](https://doi.org/10.1145/3588723), accepted for SIGMOD 2023. You can check out the paper [here](https://nuno-faria.github.io/publications/mrv).
 
 - [Multi-Record Values](#multi-record-values)
   - [Overview](#overview)
@@ -27,6 +27,7 @@ The complete design can be found in the corresponding paper, [*MRVs: Enforcing N
     - [MongoDB](#mongodb)
   - [Plot](#plot)
   - [Generic MRVs](#generic-mrvs)
+  - [Cite](#cite)
 
 ## Overview
 
@@ -305,3 +306,32 @@ Build and run the workers:
 - Edit the `src/main/resources/config.yml` accordingly;
 - Compile: `mvn clean install`;
 - Run: `mvn exec:java -Dexec.mainClass="Main"`;
+
+
+## Cite
+
+- Text
+> `Nuno Faria and José Pereira. 2023. MRVs: Enforcing Numeric Invariants in Parallel Updates to Hotspots with Randomized Splitting. Proc. ACM Manag. Data 1, 1, Article 43 (May 2023), 27 pages. https://doi.org/10.1145/3588723`
+
+
+- BibTeX
+```bib
+@article{10.1145/3588723,
+    author = {Faria, Nuno and Pereira, Jos\'{e}},
+    title = {MRVs: Enforcing Numeric Invariants in Parallel Updates to Hotspots with Randomized Splitting},
+    year = {2023},
+    issue_date = {May 2023},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {1},
+    number = {1},
+    url = {https://doi.org/10.1145/3588723},
+    doi = {10.1145/3588723},
+    abstract = {Performance of transactional systems is degraded by update hotspots as conflicts lead to waiting and wasted work. This is particularly challenging in emerging large-scale database systems, as latency increases the probability of conflicts, state-of-the-art lock-based mitigations are not available, and most alternatives provide only weak consistency and cannot enforce lower bound invariants. We address this challenge with Multi-Record Values (MRVs), a technique that can be layered on existing database systems and that uses randomization to split and access numeric values in multiple records such that the probability of conflict can be made arbitrarily small. The only coordination needed is the underlying transactional system, meaning it retains existing isolation guarantees. The proposal is tested on five different systems ranging from DBx1000 (scale-up) to MySQL GR and a cloud-native NewSQL system (scale-out). The experiments explore design and configuration trade-offs and, with the TPC-C and STAMP Vacation benchmarks, demonstrate improved throughput and reduced abort rates when compared to alternatives.},
+    journal = {Proc. ACM Manag. Data},
+    month = {may},
+    articleno = {43},
+    numpages = {27},
+    keywords = {transactions, concurrency control, distributed databases}
+}
+```
