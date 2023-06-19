@@ -1,7 +1,7 @@
 # Multi-Record Values
 
 This repo provides several benchmarks and techniques to test and implement Multi-Record Values (MRVs), including at application-level (microbenchmark), at middleware-level (TPC-C and STAMP Vacation), and at engine-level (DBx1000).
-The complete design can be found in the corresponding paper, [*MRVs: Enforcing Numeric Invariants in Parallel Updates to Hotspots with Randomized Splitting*](https://doi.org/10.1145/3588723), accepted for SIGMOD 2023. You can check out the paper [here](https://nuno-faria.github.io/publications/mrv).
+The complete design can be found in the corresponding paper, *MRVs: Enforcing Numeric Invariants in Parallel Updates to Hotspots with Randomized Splitting*, **SIGMOD 2023**. You can check out the full paper [here](https://nuno-faria.github.io/publications/mrv).
 
 - [Multi-Record Values](#multi-record-values)
   - [Overview](#overview)
