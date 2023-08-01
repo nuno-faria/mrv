@@ -240,7 +240,7 @@ public abstract class MrvWorkers {
                                     if (nodes != null) {
                                         int total = nodes.values().stream().mapToInt(x -> x).sum();
                                         int average = total / nodes.size();
-                                        int leftover = average > 0 ? total % average : total;
+                                        int leftover = total - (average * nodes.size());
                                         List<Integer> rks = new ArrayList<>(nodes.keySet());
                                         updateNodes(product, rks, average);
                                         if (leftover > 0) {
@@ -248,12 +248,12 @@ public abstract class MrvWorkers {
                                         }
                                     }
                                 }
-                                else {
+                                else if (balanceAlgorithm.equals("all")) {
                                     Map<Integer, Integer> nodes = allNodes(product);
                                     if (nodes.size() >= 2) {
                                         int total = nodes.values().stream().mapToInt(x -> x).sum();
                                         int average = total / nodes.size();
-                                        int leftover = average > 0 ? total % average : total;
+                                        int leftover = total - (average * nodes.size());
                                         updateAll(product, average);
                                         if (leftover > 0) {
                                             addStock(product, nodes.keySet().iterator().next(), leftover);

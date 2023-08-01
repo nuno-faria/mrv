@@ -21,6 +21,8 @@ public class Config {
     public String credentials;
     public List<String> connectionStrings;
     public String mode;
+    public List<Integer> loadIncreases;
+    public int loadIncrease;
     public String opDistribution;
     public List<Integer> unevenScales;
     public int unevenScale;
@@ -138,9 +140,13 @@ public class Config {
             System.exit(1);
         }
 
+        if (!config.mode.equals("increasedLoad")) {
+            config.loadIncreases = Arrays.asList(1);
+        }
+
         config.possibleBenchmarkConfigs = listsProduct(0, config.clients, config.sizes, config.initialStocks,
                 config.productsAccessed, config.amountLimits, config.isolations, config.noCollisions, config.types,
-                config.hybridReadRatios, config.unevenScales);
+                config.hybridReadRatios, config.unevenScales, config.loadIncreases);
 
         config.possibleMrvConfigs = listsProduct(0, config.initialNodes, config.zeroNodesPercentages,
                 config.balanceAlgorithms, config.balanceDeltas, config.balanceMinmaxKs, config.balanceMinmaxKRatios,
@@ -194,6 +200,7 @@ public class Config {
             type = (String) currentConfigs.get(7);
             hybridReadRatio = (double) currentConfigs.get(8);
             unevenScale = (int) currentConfigs.get(9);
+            loadIncrease = (int) currentConfigs.get(10);
             currentBenchmarkConfigIndex++;
             return true;
         }
@@ -253,6 +260,7 @@ public class Config {
     public String toString() {
         return "Config{" +
                 "mode='" + mode + '\'' +
+                ", loadIncrease=" + loadIncrease +
                 ", opDistribution='" + opDistribution + '\'' +
                 ", unevenScale=" + unevenScale +
                 ", accessDistribution='" + accessDistribution + '\'' +

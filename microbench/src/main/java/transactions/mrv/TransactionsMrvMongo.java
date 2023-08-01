@@ -159,6 +159,7 @@ public class TransactionsMrvMongo implements Transactions {
                     if (amount > 0) {
                         rk = rk + 1;
                         node = lookup(pId, rk);
+                        rk = node.getInteger("rk");
                         done = node.getInteger("rk") == initialRk;
                     }
                 }

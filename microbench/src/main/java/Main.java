@@ -160,10 +160,50 @@ public class Main {
         //monitor results
         if (monitor != null) {
             monitor.forEach((t,n) ->
-                    config.outMonitor.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                    config.outMonitor.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                             config.cli, config.size, config.initialStock, config.amountLimit, config.isolation,
-                            config.noCollision, config.adjustAlgorithm, t, (int) n[0], n[1])));
+                            config.noCollision, config.adjustAlgorithm, config.loadIncrease, t, (int) n[0], n[1])));
             config.outMonitor.flush();
+        }
+    }
+
+
+    public static class ClientsData {
+        public List<Client> clients;
+        private AtomicBoolean over;
+        private List<Thread> threads;
+
+        public ClientsData(int size, Config config, Transactions transactions) {
+            this.clients = new ArrayList<>();
+            this.over = new AtomicBoolean(false);
+
+            for (int i = 0; i < size; i++) {
+                clients.add(new Client(config.connectionStrings.get(i % config.connectionStrings.size()), config.dbms,
+                    config.mode, config.opDistribution, config.unevenScale, config.accessDistribution,
+                    this.over, transactions, config.size, config.amountLimit, config.pAccessed,
+                    config.isolation, config.noCollision, config.hybridReadRatio, config.hybridReadRatioUnit, config.cli, i));
+            }
+        }
+
+        public void start() {
+            this.over.set(false);
+            this.threads = new ArrayList<>();
+            this.clients.forEach(x -> threads.add(new Thread(x)));
+            this.threads.forEach(Thread::start);
+        }
+
+        public void stop() {
+            this.over.set(true);
+        }
+
+        public void joinThreads() {
+            this.threads.forEach(x -> {
+                try {
+                    x.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
@@ -209,13 +249,10 @@ public class Main {
         System.out.println("populating");
         transactions.populate(config.connectionStrings.get(0), config.dbms, config.size, config.initialStock, extraConfigs);
 
-        // stop flag
-        AtomicBoolean over = new AtomicBoolean();
-        over.set(false);
-
         // async add tx result log, balance nodes and adjust nodes workers
         MrvWorkers workers = null;
-        if (config.type.equals("mrv") && !config.workers.equals("none") && (config.mode.equals("write") || config.mode.equals("hybrid"))) {
+        if (config.type.equals("mrv") && !config.workers.equals("none") && 
+                (config.mode.equals("write") || config.mode.equals("hybrid") || config.mode.equals("increasedLoad"))) {
             workers = buildWorkers();
         }
 
@@ -230,15 +267,7 @@ public class Main {
         }
 
         // clients
-        List<Client> clientsL = new ArrayList<>();
-        for (int i = 0; i < config.cli; i++) {
-            clientsL.add(new Client(config.connectionStrings.get(i % config.connectionStrings.size()), config.dbms,
-                    config.mode, config.opDistribution, config.unevenScale, config.accessDistribution,
-                    over, transactions, config.size, config.amountLimit, config.pAccessed,
-                    config.isolation, config.noCollision, config.hybridReadRatio, config.hybridReadRatioUnit, config.cli, i));
-        }
-        List<Thread> clientsThreads = new ArrayList<>();
-        clientsL.forEach(x -> clientsThreads.add(new Thread(x)));
+        ClientsData mainClients = new ClientsData(config.cli, config, transactions);
 
         if (workers != null) {
             workers.start();
@@ -247,13 +276,23 @@ public class Main {
             phaseReconciliationCoordinator.start();
             addStatusWorker.start();
         }
-        clientsThreads.forEach(Thread::start);
+        mainClients.start();
 
         // timer
         timer(config.time);
 
+        // increased load mode - add extra clients and remove them after config.time
+        if (config.mode.equals("increasedLoad")) {
+            ClientsData extraClients = new ClientsData(config.cli * config.loadIncrease - config.cli, config, transactions);
+            extraClients.start();
+            timer(config.time);
+            extraClients.stop();
+            extraClients.joinThreads();
+            timer(config.time);
+        }
+
         // stop clients and workers
-        over.set(true);
+        mainClients.stop();
         if (workers != null) {
             workers.stop();
         }
@@ -262,12 +301,10 @@ public class Main {
             totalPhaseChanges = phaseReconciliationCoordinator.stop();
             addStatusWorker.stop();
         }
-        for (Thread clientThread : clientsThreads) {
-            clientThread.join();
-        }
         MrvWorkers.clearTxStatus();
+        mainClients.joinThreads();
 
-        List<TxResult> results = clientsL.stream().flatMap(x -> x.results.stream()).collect(Collectors.toList());
+        List<TxResult> results = mainClients.clients.stream().flatMap(x -> x.results.stream()).collect(Collectors.toList());
         printResults(transactions.getType(), results, workers != null ? workers.workersStatistics : new HashMap<>(),
                      workers != null ? workers.monitorMeasurements : null, totalPhaseChanges);
 
@@ -288,7 +325,7 @@ public class Main {
                 "rt_95,rt_add,rt_sub,balance_time,adjust_time,variation,max_avg_variation,zeros,readRatio,abortRateToSplit," +
                 "waitingRatioToJoin,noStockRatioToJoin,totalPhaseChanges");
         config.outMonitor = new PrintWriter("out-" + config.dbms + "-monitor-" + date + ".csv");
-        config.outMonitor.println("clients,size,initialStock,amountLimit,isolation,noCollisions,adjustAlgorithm,time,nodes,ar");
+        config.outMonitor.println("clients,size,initialStock,amountLimit,isolation,noCollisions,adjustAlgorithm,loadIncrease,time,nodes,ar");
 
         //disable mongodb logs
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -298,7 +335,7 @@ public class Main {
         rootLogger.setLevel(Level.OFF);
 
         while (config.nextBenchmarkConfig()) {
-            if (config.type.equals("mrv") && !config.workers.equals("none")) {
+            if (config.type.equals("mrv")) {
                 while (config.nextMrvConfig()) {
                     runTest();
                 }

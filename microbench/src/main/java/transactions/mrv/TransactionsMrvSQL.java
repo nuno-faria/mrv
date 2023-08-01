@@ -308,6 +308,11 @@ public class TransactionsMrvSQL implements Transactions {
         decrementStock = connection.prepareStatement("SELECT remove_stock_mrv(?, ?, ?)");
         incrementStock = connection.prepareStatement("SELECT add_stock_mrv(?, ?, ?)");
         getStock = connection.prepareStatement("SELECT total from Total_Stock WHERE pid = ?");
+        if (dbms.equals("postgresql")) {
+            Statement s = connection.createStatement();
+            s.execute("set random_page_cost = 0");
+            s.close();
+        }
         connection.setAutoCommit(false);
     }
 

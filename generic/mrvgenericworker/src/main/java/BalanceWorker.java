@@ -225,7 +225,7 @@ public class BalanceWorker implements Runnable {
                             if (nodesToBalance != null) {
                                 int total = nodesToBalance.values().stream().mapToInt(x -> x).sum();
                                 int average = total / nodesToBalance.size();
-                                int leftover = average > 0 ? total % average : total;
+                                int leftover = total - (average * nodesToBalance.size());
                                 List<Integer> rks = new ArrayList<>(nodesToBalance.keySet());
                                 updateNodes(job, rks, average);
 

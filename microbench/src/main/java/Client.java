@@ -107,8 +107,10 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
+        int i = 1;
+        int unevenAdd = 0;
         while (!over.get()) {
-            boolean write = mode.equals("write") ||
+            boolean write = mode.equals("write") || mode.equals("increasedLoad") ||
                     (mode.equals("hybrid") && hybridReadRatioUnit.equals("transactions") && rand.nextDouble() > hybridReadRatio) ||
                     (mode.equals("hybrid") && hybridReadRatioUnit.equals("clients") && id >= totalClients * hybridReadRatio);
             char type;
@@ -134,17 +136,20 @@ public class Client implements Runnable {
                     }
                 }
                 else {
-                    if (rand.nextInt(unevenScale + 1) == 0) {
+                    if (i % (unevenScale + 1) == 0) {
                         type = 'a';
                         // adds retried in order to commit
                         while (!result) {
                             long begin = System.nanoTime();
+                            // distribute the adds evenly, so we don't end up with products without stock
+                            products = List.of("p" + ((this.id + unevenAdd) % this.pIdLimit));
                             result = transactions.incrementStock(products, unevenScale);
                             duration = System.nanoTime() - begin;
                             if (!result) {
                                 results.add(new TxResult(System.currentTimeMillis(), false, duration / 1e6, 'a', products.size()));
                             }
                         }
+                        unevenAdd += 1;
                     }
                     else {
                         boolean done = false;
@@ -176,6 +181,7 @@ public class Client implements Runnable {
             }
 
             results.add(new TxResult(System.currentTimeMillis(), result, duration / 1e6, type, products.size()));
+            i += 1;
         }
         transactions.closeConnection();
     }

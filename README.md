@@ -27,6 +27,7 @@ The complete design can be found in the corresponding paper, *MRVs: Enforcing Nu
     - [MongoDB](#mongodb)
   - [Plot](#plot)
   - [Generic MRVs](#generic-mrvs)
+  - [Reproducibility](#reproducibility)
   - [Cite](#cite)
 
 ## Overview
@@ -306,6 +307,11 @@ Build and run the workers:
 - Edit the `src/main/resources/config.yml` accordingly;
 - Compile: `mvn clean install`;
 - Run: `mvn exec:java -Dexec.mainClass="Main"`;
+
+
+## Reproducibility
+
+[Check the `reproducibility` folder.](/reproducibility)
 
 
 ## Cite

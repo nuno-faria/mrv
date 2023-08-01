@@ -1,8 +1,9 @@
 sudo docker-compose --compatibility up -d
 
-echo "Waiting for all nodes to start ..."
-
-sleep 45
+until sudo docker-compose --compatibility exec node1 mysql -uroot -proot -e "select 1" &> /dev/null; do
+  echo "Waiting for all nodes to start ..."
+  sleep 5
+done
 
 sudo docker-compose --compatibility exec node1 mysql -uroot -proot \
   -e "SET @@GLOBAL.group_replication_bootstrap_group=1;" \

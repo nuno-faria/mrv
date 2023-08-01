@@ -33,6 +33,11 @@ services:
       "--loose-group-replication-single-primary-mode=OFF",
       "--loose-group-replication-enforce-update-everywhere-checks=ON",
       "--max_connections=5000"]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 8G
     healthcheck:
       test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
       interval: 2s
@@ -69,6 +74,11 @@ services:
       "--loose-group-replication-single-primary-mode=OFF",
       "--loose-group-replication-enforce-update-everywhere-checks=ON",
       "--max_connections=5000"]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 8G
     healthcheck:
       test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
       interval: 2s
@@ -105,6 +115,11 @@ services:
       "--loose-group-replication-single-primary-mode=OFF",
       "--loose-group-replication-enforce-update-everywhere-checks=ON",
       "--max_connections=5000"]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 8G
     healthcheck:
       test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
       interval: 2s

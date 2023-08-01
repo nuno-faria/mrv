@@ -1,0 +1,241 @@
+\documentclass[border=2cm]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage[tt=false, type1=true]{libertine}
+\usepackage[varqu]{zi4}
+\usepackage[libertine]{newtxmath}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage[labelfont=bf]{caption}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{minipage}{17cm}
+
+\section*{Experimental Results}
+
+\setcounter{figure}{3}
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{.245\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig4/write_postgres.pdf}
+        \caption{Write PG}
+    \end{subfigure}
+    \begin{subfigure}{.245\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig4/write_mongodb.pdf}
+        \caption{Write MD}
+    \end{subfigure}
+    \begin{subfigure}{.245\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig4/read_postgres.pdf}
+        \caption{Read PG}
+    \end{subfigure}
+    \begin{subfigure}{.245\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig4/read_mongodb.pdf}
+        \caption{Read MD}
+    \end{subfigure}
+    \caption{Comparison of the response time ratio between MRVs and baseline (single record) in the microbenchmark, for PostgreSQL (PG) and MongoDB (MD).}
+\end{figure}
+
+\vspace{1cm}
+
+\setcounter{table}{3}
+\begin{table}[t]
+	\centering
+	\caption{MRVs storage overhead relatively to the baseline.}
+	\includegraphics[width=0.7\linewidth]{../plots/tab4/results.pdf}
+\end{table}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig5/records.pdf}
+        \subcaption{Number of records}
+    \end{subfigure}
+    \begin{subfigure}{.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig5/ar.pdf}
+        \subcaption{Abort rate}
+    \end{subfigure}
+    \caption{Evolution of the number of records and abort rate based on different load changes in MRVs.
+    \normalfont \small $\times n$ means an $n$ times increase in the number of clients between 60 and 120 seconds.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig6/balanceTime.pdf}
+        \subcaption{Balance time}
+    \end{subfigure}
+    \begin{subfigure}{.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig6/zeros.pdf}
+        \subcaption{Percentage of zeros}
+    \end{subfigure}
+    \begin{subfigure}{.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig6/tx.pdf}
+        \subcaption{Throughput}
+    \end{subfigure}
+    \begin{subfigure}{.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../plots/fig6/ar.pdf}
+        \subcaption{Abort rate}
+    \end{subfigure}
+    \caption{Comparison between different balance algorithms.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{../plots/fig7/ratio.pdf}
+	\caption{Comparison between different balance sizes (K) in MRVs performance ($c_i = \frac{\text{Zeros}_{K=i}}{\text{Zeros}_{K=1}} \cdot \frac{\text{Time}_{K=i}}{\text{Time}_{K=1}}$). \small \normalfont Lower is better.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig8/balance.pdf}
+		\subcaption{Balance worker}
+	\end{subfigure}
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig8/adjust.pdf}
+		\subcaption{Adjust worker}
+	\end{subfigure}
+	\caption{Effects of different windows in the MRVs workers.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig9/writes.pdf}
+		\subcaption{Write throughput}
+	\end{subfigure}
+	\hspace*{0.2cm}
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig9/reads.pdf}
+		\subcaption{Read throughput}
+	\end{subfigure}
+	\caption{Comparison between baseline (native), MRV, and \textit{phase reconciliation} using the microbenchmark with a variable read percentage (PostgreSQL \textsc{Repeatable Read}).}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig10/tx.pdf}
+		\subcaption{Throughput}
+	\end{subfigure}
+	\hspace*{0.2cm}
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig10/ar.pdf}
+		\subcaption{Abort rate}
+	\end{subfigure}
+	\caption{Comparison between baseline (native), MRV, and \textit{phase reconciliation} using the microbenchmark with various \textit{uneven} scales (writes only; PostgreSQL \textsc{R. Read}).
+	\normalfont \small $x=1$: 1-unit $add$ per 1-unit $sub$; $x=5$: 5-unit $add$ per five 1-unit $subs$, and so on.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig11/tx.pdf}
+		\subcaption{Average throughput}
+	\end{subfigure}
+	\hspace*{0.2cm}
+	\begin{subfigure}{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig11/ar.pdf}
+		\subcaption{Average abort rate}
+	\end{subfigure}
+	\caption{Comparison between baseline (native), MRV, and \textit{escrow locking} using TPC-C's \textit{payment} in DBx1000.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure*}[h]
+	\centering
+	\captionsetup{justification=centering}
+	\begin{subfigure}{.32\linewidth}
+		\includegraphics[width=\linewidth,trim={0 0 1.7cm 0},clip]{../plots/fig12/microbench.pdf}
+		\caption{\textit{Microbenchmark}\\(scale=Products)}
+	\end{subfigure}
+	\begin{subfigure}{.32\linewidth}
+		\includegraphics[width=\linewidth,trim={0 0 1.7cm 0},clip]{../plots/fig12/tpcc.pdf}
+		\caption{\textit{TPC-C}\\(scale=Warehouses)}
+	\end{subfigure}
+	\begin{subfigure}{.32\linewidth}
+		\includegraphics[width=\linewidth,trim={0 0 1.7cm 0},clip]{../plots/fig12/vacation.pdf}
+		\caption{\textit{STAMP Vacation (opt.)}\\(scale=Items per type)}
+	\end{subfigure}
+	\captionsetup{justification=justified}
+	\caption{Throughput comparison between MRVs and baseline (native) using different workloads with PostgreSQL's \textsc{Repeatable Read}. \small \normalfont A value of $1.0$ means MRVs and native have the same throughput, $2.0$ means double the throughput for MRV, and so on.}
+\end{figure*}
+
+\vspace{1cm}
+
+\begin{figure*}[h]
+	\centering
+	\captionsetup{justification=centering}
+	\begin{subfigure}{.32\linewidth}
+		\includegraphics[width=\linewidth,trim={0 0 1.7cm 0},clip]{../plots/fig13/postgres.pdf}
+		\caption{\textit{Single-writer SQL}\\(PostgreSQL)}
+	\end{subfigure}
+	\begin{subfigure}{.32\linewidth}
+		\includegraphics[width=\linewidth,trim={0 0 1.7cm 0},clip]{../plots/fig13/mongodb.pdf}
+		\caption{\textit{Single-writer NoSQL}\\(MongoDB)}
+	\end{subfigure}
+	\begin{subfigure}{.32\linewidth}
+		\includegraphics[width=\linewidth,trim={0 0 1.7cm 0},clip]{../plots/fig13/mysql.pdf}
+		\caption{\textit{Multi-writer SQL}\\(MySQL Group Replication)}
+	\end{subfigure}
+	\captionsetup{justification=justified}
+	\caption{Throughput comparison between MRVs and baseline (native) using the microbenchmark with different database management systems. \small \normalfont A value of $1.0$ means MRVs and native had the same throughput, $2.0$ means double the throughput for MRV, and so on.}
+\end{figure*}
+
+\vspace{1cm}
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[t]{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig14/without_mrvs.pdf}
+		\caption{Without MRVs}
+	\end{subfigure}
+	\begin{subfigure}[t]{.35\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{../plots/fig14/with_mrvs.pdf}
+		\caption{With MRVs}
+	\end{subfigure}
+	\caption{Throughput comparison between different concurrency control techniques with and without MRVs.
+	\small \normalfont 2PL a) is equivalent to \textit{native} of Figure~11; 2PL b) is equivalent to \textit{mrv} in Figure~11.}
+\end{figure}
+
+
+
+\end{minipage}
+
+\end{document}

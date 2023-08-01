@@ -18,7 +18,7 @@ pass: postgres
 # time for each test (seconds, first 5 are removed from the final results, therefore must be > 5)
 time: 65
 # mode of the benchmark: write, read, hybrid (reads and writes, controlled by the hybridReadRatios parameter)
-# or increasedLoad (starts with 'clients', then after 'time' the number of clients increases based
+# or increasedLoad (starts with 'clients', then after 'time' the number of clients increases based 
 # on the 'loadIncrease' variable, then after 'time' it goes back to the baseline)
 # (note: throughput results for the increasedLoad should be ignored. this mode is only useful for
 # the output returned by the monitor)

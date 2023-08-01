@@ -146,6 +146,11 @@ public class MrvWorkersSQL extends MrvWorkers {
 
             this.connection = DriverManager.getConnection(connectionString);
             this.connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            if (dbms.equals("postgresql")) {
+                Statement s = this.connection.createStatement();
+                s.execute("set random_page_cost = 0");
+                s.close();
+            }
             this.allProducts = connection.prepareStatement(
                     "SELECT pid FROM Product_Tx " +
                     "WHERE last_updated >= " + windowBegin
@@ -160,16 +165,20 @@ public class MrvWorkersSQL extends MrvWorkers {
                 String minmaxLimitCondition;
                 if (minmaxKRatio > 0) {
                     minmaxLimitCondition =
-                        " (SELECT least(greatest(count(*) /" + minmaxKRatio + ", 1), 32) FROM Product_Stock WHERE pid = ?) ";
+                        " (SELECT least(greatest(count(*) /" + minmaxKRatio + ", 1), 32) FROM T) ";
                 }
                 else {
                     minmaxLimitCondition = " " + minmaxK;
                 }
                 this.maxMinNodes = connection.prepareStatement(
-                        "(SELECT rk, stock FROM Product_Stock WHERE pid = ? ORDER BY stock DESC LIMIT " + minmaxLimitCondition + ") " +
-                        "UNION ALL " +
-                        "(SELECT rk, stock FROM Product_Stock WHERE pid = ? ORDER BY stock ASC LIMIT " + minmaxLimitCondition + ") "
-                );
+                    "WITH T AS (  " +
+                        "SELECT rk, stock, row_number() over (order by stock desc, random()) " +
+                        "FROM Product_Stock " +
+                        "WHERE pid = ? " +
+                    ")  " +
+                    "(SELECT rk, stock FROM T LIMIT + " + minmaxLimitCondition + ") " +
+                    "UNION ALL " +
+                    "(SELECT rk, stock FROM T ORDER BY row_number DESC LIMIT " + minmaxLimitCondition + "); ");
             }
             else {
                 connection.createStatement().execute("DROP PROCEDURE IF EXISTS minmaxNodes");
@@ -292,14 +301,6 @@ public class MrvWorkersSQL extends MrvWorkers {
         @Override
         Map<Integer, Integer> maxMinNodes(String pid) throws Exception {
             maxMinNodes.setString(1, pid);
-            if (dbms.equals("postgresql")) {
-                maxMinNodes.setString(2, pid);
-                if (minmaxKRatio > 0) {
-                    maxMinNodes.setString(3, pid);
-                    maxMinNodes.setString(4, pid);
-                }
-            }
-
             ResultSet rs = maxMinNodes.executeQuery();
             Map<Integer, Integer> results = new HashMap<>();
             int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
