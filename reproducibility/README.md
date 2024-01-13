@@ -16,6 +16,9 @@ Running all tests can be done with a single command and takes approximately 29 h
 
 (The original tests ran on Google Cloud Engine virtual machines, using N1 vCPUs and persistent SSDs.)
 
+**Note: to better simulate the paper results, ensure that an SSD is used for the databases' storage.**
+
+
 ### Setup
 
 Installs the databases and benchmarks.

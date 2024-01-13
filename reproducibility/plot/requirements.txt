@@ -2,3 +2,4 @@ matplotlib
 numpy
 pandas
 seaborn
+jinja2==3.1.3

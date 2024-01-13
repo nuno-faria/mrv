@@ -379,6 +379,7 @@ fig11 () {
     _set dbx1000 TYPES "(NATIVE MRV ESCROW)"
     _set dbx1000 THREADS "(32)"
     _set dbx1000 WAREHOUSES "(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16)"
+    _set dbx1000 MAX_TXN_PER_PART "(1000000)"
     ./run.sh
     python3 output_to_csv.py results
     mv out.csv ../reproducibility/results/fig11/results.csv
@@ -528,6 +529,7 @@ tab4() {
         # native
         _set micro types "[normal]"
         mvn exec:java -Dexec.mainClass="Main"
+        PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -c "vacuum full"
         size=$(PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -A -t -c "select pg_total_relation_size('product')")
         echo "1-column-native,$c,$size" >> ../reproducibility/results/tab4/results.csv
         PGPASSWORD=postgres dropdb -U postgres -h 127.0.0.1 testdb
@@ -535,6 +537,7 @@ tab4() {
         # mrv
         _set micro types "[mrv]"
         mvn exec:java -Dexec.mainClass="Main"
+        PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -c "vacuum full"
         size=$(PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -A -t -c "select pg_total_relation_size('product_orig') + pg_total_relation_size('product_stock')")
         echo "1-column-mrv,$c,$size" >> ../reproducibility/results/tab4/results.csv
         PGPASSWORD=postgres dropdb -U postgres -h 127.0.0.1 testdb
@@ -558,14 +561,16 @@ tab4() {
         # native
         _set tpcc TYPES "(native)"
         ./run.sh
-        size=$(PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -A -t -c "select pg_database_size('testdb')")
+        PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -c "vacuum full"
+        size=$(PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -A -t -c "select pg_database_size('testdb') - pg_total_relation_size('history1')")
         echo "tpcc-native,$c,$size" >> ../reproducibility/results/tab4/results.csv
         PGPASSWORD=postgres dropdb -U postgres -h 127.0.0.1 testdb
         PGPASSWORD=postgres createdb -U postgres -h 127.0.0.1 testdb
         # mrv
         _set tpcc TYPES "(mrv)"
         ./run.sh
-        size=$(PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -A -t -c "select pg_database_size('testdb')")
+        PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -c "vacuum full"
+        size=$(PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -d testdb -A -t -c "select pg_database_size('testdb') - pg_total_relation_size('history1')")
         echo "tpcc-mrv,$c,$size" >> ../reproducibility/results/tab4/results.csv
         PGPASSWORD=postgres dropdb -U postgres -h 127.0.0.1 testdb
         PGPASSWORD=postgres createdb -U postgres -h 127.0.0.1 testdb
